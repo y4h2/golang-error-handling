@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/y4h2/golang-error-handling/app/entity"
-	"github.com/y4h2/golang-error-handling/app/service"
+	"github.com/y4h2/golang-error-handling/pkg/myerr"
 )
 
 type ServiceLayer interface {
@@ -27,9 +27,9 @@ func (api *API) Get(w http.ResponseWriter, r *http.Request) {
 
 	article, err := api.service.GetArticle(id)
 	if err != nil {
-		if err == service.NotFoundErr {
+		if userErr, ok := myerr.ToUserError(err); ok {
 			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("article not found"))
+			w.Write([]byte(userErr.Error()))
 		}
 
 		w.WriteHeader(http.StatusInternalServerError)

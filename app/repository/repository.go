@@ -2,12 +2,19 @@ package repository
 
 import (
 	"database/sql"
-	"errors"
 
 	"github.com/y4h2/golang-error-handling/app/entity"
 )
 
-var NotFoundErr = errors.New("article not found")
+type notFoundErr struct {
+	msg string
+}
+
+func (err notFoundErr) Error() string {
+	return err.msg
+}
+
+func (notFoundErr) UserError() {}
 
 type Repository struct {
 	db *sql.DB
@@ -27,7 +34,7 @@ func (repo *Repository) GetArticleByID(id int64) (*entity.Article, error) {
 	err := row.Scan(article.ID, article.Title, article.Author, article.UpdatedAt, article.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, NotFoundErr
+			return nil, notFoundErr{"article not found"}
 		}
 
 		return nil, err
